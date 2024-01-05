@@ -3,7 +3,10 @@ using System.Collections.Generic;
 
 namespace SContainer.Runtime
 {
-    public class Registry
+    /// <summary>
+    /// Get Registration from Registry which wrapped into this.
+    /// </summary>
+    public sealed class Registry
     {
         private static IDictionary<Type, Registration> buildBuffer = new Dictionary<Type, Registration>(128);
 
