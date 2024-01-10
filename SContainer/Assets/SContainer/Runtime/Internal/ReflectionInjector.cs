@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace SContainer.Runtime.Internal
 {
     /// <summary>
     /// 通过反射将注册的类型解析出来，并注入到 injectTypeInfo 所对应的对象中
     /// </summary>
-    public class ReflectionInjector : IInjector
+    internal sealed class ReflectionInjector : IInjector
     {
         public static ReflectionInjector Build(Type type)
         {
@@ -52,6 +53,7 @@ namespace SContainer.Runtime.Internal
         /// <summary>
         /// 只注入字段、属性和方法
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Inject(object instance, IObjectResolver resolver)
         {
             this.InjectFields(instance, resolver);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SContainer.Runtime.Internal;
+using System;
 
 namespace SContainer.Runtime
 {
@@ -15,7 +16,12 @@ namespace SContainer.Runtime
 
         public virtual Registration Build()
         {
-            throw new NotImplementedException();
+            var injector = InjectorCache.GetOrBuild(this.ImplementationType);
+            var spawner = new InstanceProvider(injector);
+            return new Registration(
+                this.ImplementationType,
+                this.Lifetime,
+                spawner);
         }
     }
 }
