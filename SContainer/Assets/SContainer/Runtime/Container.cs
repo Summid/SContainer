@@ -5,6 +5,17 @@ using System.Runtime.CompilerServices;
 
 namespace SContainer.Runtime
 {
+    /// <summary>
+    /// Container，分为 Root 和 Scope 两类；
+    /// 其中 RootContainer 也有 ScopeContainer 的功能（解析 Lifetime == Scope 对象的情况）;
+    /// 因此 ScopeContainer 解析单例对象时，（如果需要）会去 Parent Container 里寻找，直到到达 RootContainer
+    /// </summary>
+    /// <remarks>
+    /// Container 主要提供两种功能，Resolve 和 Inject；
+    /// Resolve：从注册的 Registration 里解析所需对象；
+    /// Inject：将所需对象注入到参数 instance 对象中，instance 一般为 MonoBehaviour/GameObject；（Mono 不支持构造方法，因此只能采用 Fields/Property/Method 的注入方式）
+    /// </remarks>
+    
     public interface IObjectResolver : IDisposable
     {
         object ApplicationOrigin { get; }
@@ -24,7 +35,6 @@ namespace SContainer.Runtime
         /// This version of resolve will look for instances from only the registration information already founds.
         /// </remarks>
         object Resolve(Registration registration);
-        void Inject(object instance);
     }
 
     public enum Lifetime
@@ -69,13 +79,6 @@ namespace SContainer.Runtime
         public object Resolve(Registration registration)
         {
             return this.ResolveCore(registration);
-        }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Inject(object instance)
-        {
-            var injector = InjectorCache.GetOrBuild(instance.GetType());
-            injector.Inject(instance, this);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
