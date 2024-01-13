@@ -168,7 +168,7 @@ namespace SContainer.Runtime.Internal
             }
 
             // 一般的 C# 类会有默认构造方法
-            if (injectConstructor != null)
+            if (injectConstructor == null)
             {
                 var allowNoConstructor = type.IsEnum;
                 
