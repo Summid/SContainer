@@ -103,7 +103,8 @@ namespace SContainer.Runtime
                     return singleton.Value;
                     
                 case Lifetime.Scoped:
-                    return this.Resolve(registration);
+                    throw new NotImplementedException("Resolving scope is not supported currently.");
+                    // return this.Resolve(registration);
                 
                 default: // Transient : Instance per resolving.
                     return registration.SpawnInstance(this);
