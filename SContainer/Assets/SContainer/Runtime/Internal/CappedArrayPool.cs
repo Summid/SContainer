@@ -32,8 +32,8 @@ namespace SContainer.Runtime.Internal
                 {
                     this.buckets[i][j] = new T[arrayLength];  // bucket 里存放的是数组（因为这是对象池类）
                 }
-                //  this.tail[i] = this.buckets[i].Length - 1;
-                this.tails[i] = 0;
+                this.tails[i] = this.buckets[i].Length - 1;
+                // this.tails[i] = 0;
             }
         }
 

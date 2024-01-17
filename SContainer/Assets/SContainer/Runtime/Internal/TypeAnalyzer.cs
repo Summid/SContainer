@@ -232,10 +232,10 @@ namespace SContainer.Runtime.Internal
                                     goto EndFields;
                             }
                             
-                            // if (injectFields.Any(x => x.Name == fieldInfo.Name)) // 为什么要重复判断？
-                            // {
-                            //     continue;
-                            // }
+                            if (injectFields.Any(x => x.Name == fieldInfo.Name)) // 为什么要重复判断？
+                            {
+                                continue;
+                            }
                         }
                         injectFields.Add(fieldInfo);
                     }
