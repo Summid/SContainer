@@ -71,6 +71,7 @@ namespace SContainer.Runtime.Internal
             var i = array.Length - 1;
             lock (this.syncRoot)
             {
+                Array.Clear(array, 0, array.Length);
                 if (this.tails[i] > 0)
                     this.tails[i] -= 1;
             }
