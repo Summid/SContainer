@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace SContainer.Runtime.Internal
 {
-    internal static class InjectorCache
+    public static class InjectorCache
     {
         private static readonly ConcurrentDictionary<Type, IInjector> Injectors = new ConcurrentDictionary<Type, IInjector>();
 
