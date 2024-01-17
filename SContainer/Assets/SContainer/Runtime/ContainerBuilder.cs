@@ -37,7 +37,7 @@ namespace SContainer.Runtime
         }
 
         private readonly List<RegistrationBuilder> registrationBuilders = new List<RegistrationBuilder>();
-        private List<Action<IObjectResolver>> builderCallbacks;
+        private Action<IObjectResolver> builderCallback;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Register<T>(T registrationBuilder) where T : RegistrationBuilder
@@ -49,9 +49,7 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void RegisterBuildCallback(Action<IObjectResolver> callback)
         {
-            if (this.builderCallbacks == null)
-                this.builderCallbacks = new List<Action<IObjectResolver>>();
-            this.builderCallbacks.Add(callback);
+            this.builderCallback += callback;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -95,12 +93,7 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected void EmitCallback(IObjectResolver container)
         {
-            if (this.builderCallbacks == null) return;
-
-            foreach (var  callback in this.builderCallbacks)
-            {
-                callback.Invoke(container);
-            }
+            this.builderCallback?.Invoke(container);
         }
     }
 }
