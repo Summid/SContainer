@@ -5,8 +5,8 @@ namespace SContainer.Runtime
 {
     public class RegistrationBuilder
     {
-        protected readonly Type ImplementationType;
-        protected readonly Lifetime Lifetime;
+        internal protected readonly Type ImplementationType;
+        internal protected readonly Lifetime Lifetime;
         
         public RegistrationBuilder(Type implementationType, Lifetime lifetime)
         {
