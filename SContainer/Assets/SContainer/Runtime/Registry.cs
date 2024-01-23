@@ -50,11 +50,53 @@ namespace SContainer.Runtime
         {
             if (buf.TryGetValue(service, out var exists))
             {
-                throw new SContainerException(service, $"Duplicate implementation type is not supported currently.");
+                // already add service
+                CollectionInstanceProvider collection;
+                if (buf.TryGetValue(RuntimeTypeCache.EnumerableTypeOf(service), out var found) &&
+                    found.Provider is CollectionInstanceProvider foundProvider)
+                {
+                    // already add collection provider
+                    collection = foundProvider;
+                }
+                else
+                {
+                    // encounter first duplicate, add IEnumerable<> instead of typeof(service)
+                    collection = new CollectionInstanceProvider(service) { exists }; // invoke collProvider.Add
+                    var newRegistration = new Registration(
+                        RuntimeTypeCache.ArrayTypeOf(service),
+                        Lifetime.Transient,
+                        new List<Type>
+                        {
+                            RuntimeTypeCache.EnumerableTypeOf(service),
+                            RuntimeTypeCache.ReadOnlyListTypeOf(service)
+                        }, collection);
+                    AddCollectionToBuildBuffer(buf, newRegistration);
+                }
+                collection.Add(registration);
+
+                // Overwritten by the later registration, 这样才能让 buf.TryGetValue 返回 true
+                buf[service] = registration;
             }
             else
             {
                 buf.Add(service, registration);
+            }
+        }
+
+        private static void AddCollectionToBuildBuffer(IDictionary<Type, Registration> buf, Registration collectionRegistration)
+        {
+            for (var i = 0; i < collectionRegistration.InterfaceTypes.Count; i++)
+            {
+                var collectionType = collectionRegistration.InterfaceTypes[i];
+                try
+                {
+                    // Add IEnumerable<typeof<service>>, IReadOnlyList<typeof<service>> to buf as key
+                    buf.Add(collectionType, collectionRegistration);
+                }
+                catch (ArgumentException)
+                {
+                    throw new SContainerException(collectionType, $"Registration with the same key already exists: {collectionRegistration}");
+                }
             }
         }
 
