@@ -23,7 +23,23 @@ namespace SContainer.Runtime
             
             foreach (var registration in registrations)
             {
-                AddToBuildBuffer(buildBuffer, registration.ImplementationType, registration);
+                if (registration.InterfaceTypes is IReadOnlyList<Type> interfaceTypes) // if registration.InterfaceTypes is not null
+                {
+                    for (var i = 0; i < interfaceTypes.Count; i++)
+                    {
+                        AddToBuildBuffer(buildBuffer, interfaceTypes[i], registration);
+                    }
+
+                    // Mark the implementationType with a guard because we need to check if it exists later.
+                    if (!buildBuffer.ContainsKey(registration.ImplementationType))
+                    {
+                        buildBuffer.Add(registration.ImplementationType, null);
+                    }
+                }
+                else
+                {
+                    AddToBuildBuffer(buildBuffer, registration.ImplementationType, registration);
+                }
             }
 
             var hashTable = new FixedTypeKeyHashTable<Registration>(buildBuffer.ToArray());

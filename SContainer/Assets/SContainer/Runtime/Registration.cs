@@ -11,22 +11,26 @@ namespace SContainer.Runtime
     public sealed class Registration
     {
         public readonly Type ImplementationType;
+        public readonly IReadOnlyList<Type> InterfaceTypes;
         public readonly Lifetime Lifetime;
         public readonly IInstanceProvider Provider;
         
         public Registration(
             Type implementationType,
             Lifetime lifetime,
+            IReadOnlyList<Type> interfaceTypes,
             IInstanceProvider provider)
         {
             this.ImplementationType = implementationType;
+            this.InterfaceTypes = interfaceTypes;
             this.Lifetime = lifetime;
             this.Provider = provider;
         }
 
         public override string ToString()
         {
-            return $"Registration {this.ImplementationType.Name} {this.Lifetime} {this.Provider}";
+            var contractTypes = this.InterfaceTypes != null ? string.Join(", ", this.InterfaceTypes) : "";
+            return $"Registration {this.ImplementationType.Name} ContractTypes=[{contractTypes}] {this.Lifetime} {this.Provider}";
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
