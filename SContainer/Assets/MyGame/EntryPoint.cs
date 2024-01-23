@@ -12,6 +12,7 @@ namespace MyGame
             var container = this.Scope.Container;
             var gamePresenter = container.Resolve(typeof(GamePresenter)) as GamePresenter;
             gamePresenter.HelloWorld();
+            gamePresenter.CharacterAction();
         }
     }
 }

@@ -21,7 +21,7 @@ namespace SContainer.Runtime
         
         T Register<T>(T registrationBuilder) where T : RegistrationBuilder;
         void RegisterBuildCallback(Action<IObjectResolver> container);
-        bool Exists(Type type);
+        bool Exists(Type type, bool includeInterfaceTypes = false);
     }
 
     public class ContainerBuilder : IContainerBuilder
@@ -53,11 +53,12 @@ namespace SContainer.Runtime
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists(Type type)
+        public bool Exists(Type type, bool includeInterfaceTypes)
         {
             foreach (var registrationBuilder in this.registrationBuilders)
             {
-                if (registrationBuilder.ImplementationType == type)
+                if (registrationBuilder.ImplementationType == type ||
+                    includeInterfaceTypes && registrationBuilder.InterfaceTypes?.Contains(type) == true)
                 {
                     return true;
                 }

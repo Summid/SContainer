@@ -1,16 +1,18 @@
-﻿namespace MyGame
+﻿using System;
+using UnityEngine;
+
+namespace MyGame
 {
-    public class HelloWorldService
+    public class HelloWorldService : IDisposable
     {
         public void Hello()
         {
-            UnityEngine.Debug.Log("Hello World");
+            Debug.Log("Hello World");
         }
-
-        // Circular dependency is not allowed.
-        // public HelloWorldService(GamePresenter gamePresenter)
-        // {
-        //     
-        // }
+        
+        public void Dispose()
+        {
+            Debug.Log("HelloWorldService Disposed");
+        }
     }
 }
