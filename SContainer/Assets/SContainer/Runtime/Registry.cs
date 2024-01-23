@@ -74,7 +74,7 @@ namespace SContainer.Runtime
                 }
                 collection.Add(registration);
 
-                // Overwritten by the later registration, 这样才能让 buf.TryGetValue 返回 true
+                // Overwritten by the later registration（多次注册同个类型后，如果只解析单个对象，解析出来的是最后注册的对象，注册接口同理）
                 buf[service] = registration;
             }
             else
