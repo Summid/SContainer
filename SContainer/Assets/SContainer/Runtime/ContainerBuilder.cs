@@ -24,6 +24,30 @@ namespace SContainer.Runtime
         bool Exists(Type type, bool includeInterfaceTypes = false);
     }
 
+    public sealed class ScopedContainerBuilder : ContainerBuilder
+    {
+        private readonly IObjectResolver root;
+        private readonly IScopedObjectResolver parent;
+
+        internal ScopedContainerBuilder(IObjectResolver root, IScopedObjectResolver parent)
+        {
+            this.root = root;
+            this.parent = parent;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IScopedObjectResolver BuildScope()
+        {
+            var registry = this.BuildRegistry();
+            var container = new ScopedContainer(registry, this.root, this.parent, this.ApplicationOrigin);
+            this.EmitCallback(container);
+            return container;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override IObjectResolver Build() => this.BuildScope();
+    }
+
     public class ContainerBuilder : IContainerBuilder
     {
         public object ApplicationOrigin { get; set; }

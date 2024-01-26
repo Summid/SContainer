@@ -112,5 +112,18 @@ namespace SContainer.Runtime
 
             return false;
         }
+
+        public bool Exists(Type type)
+        {
+            if (this.hashTable.TryGet(type, out _))
+                return true;
+
+            if (type.IsConstructedGenericType)
+            {
+                type = RuntimeTypeCache.OpenGenericTypeOf(type);
+            }
+
+            return this.hashTable.TryGet(type, out _);
+        }
     }
 }
