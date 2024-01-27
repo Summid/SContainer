@@ -7,6 +7,9 @@ namespace SContainer.Runtime.Unity
     public class LifetimeScope : MonoBehaviour, IDisposable
     {
         [SerializeField]
+        public ParentReference parentReference;
+        
+        [SerializeField]
         public bool autoRun = true;
         
         public IObjectResolver Container { get; private set; }
