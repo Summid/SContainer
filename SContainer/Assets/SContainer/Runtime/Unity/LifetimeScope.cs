@@ -54,6 +54,102 @@ namespace SContainer.Runtime.Unity
         private static readonly Stack<LifetimeScope> GlobalOverrideParents = new Stack<LifetimeScope>(); // EnqueueParent(Scope)'s cache
         private static readonly Stack<IInstaller> GlobalExtraInstallers = new Stack<IInstaller>(); // Enqueue(Action<builder>)'s cache
         private static readonly object SyncRoot = new object();
+
+#region Interfaces
+        private static LifetimeScope Create(IInstaller installer = null)
+        {
+            var gameObject = new GameObject("LifetimeScope");
+            gameObject.SetActive(false);
+            var newScope = gameObject.AddComponent<LifetimeScope>();
+            if (installer != null)
+            {
+                newScope.localExtraInstallers.Add(installer);
+            }
+            gameObject.SetActive(true);
+            return newScope;
+        }
+
+        /// <summary> Create a single LifetimeScope </summary>
+        public static LifetimeScope Create(Action<IContainerBuilder> configuration)
+            => Create(new ActionInstaller(configuration));
+        
+        /// <summary> Make the param parent be the scope's "parent" which generated in "using block" </summary>
+        public static ParentOverrideScope EnqueueParent(LifetimeScope parent)
+            => new ParentOverrideScope(parent);
+
+        /// <summary> Add additional registers </summary>
+        public static ExtraInstallationScope Enqueue(Action<IContainerBuilder> installing)
+            => new ExtraInstallationScope(new ActionInstaller(installing));
+        
+        /// <summary> Add additional registers </summary>
+        public static ExtraInstallationScope Enqueue(IInstaller installer)
+            => new ExtraInstallationScope(installer);
+
+        /// <summary> Create a child scope (with extra registrations via "IInstaller") </summary>
+        public TScope CreateChild<TScope>(IInstaller installer = null)
+            where TScope : LifetimeScope
+        {
+            var childGameObject = new GameObject("LifetimeScope (Child)");
+            childGameObject.SetActive(false);
+            if (this.IsRoot)
+            {
+                DontDestroyOnLoad(childGameObject);
+            }
+            else
+            {
+                childGameObject.transform.SetParent(this.transform, false);
+            }
+            var child = childGameObject.AddComponent<TScope>();
+            if (installer != null)
+            {
+                child.localExtraInstallers.Add(installer);
+            }
+            child.parentReference.Object = this;
+            childGameObject.SetActive(true);
+            return child;
+        }
+
+        /// <summary> Create a child scope (with extra registrations via "IInstaller") </summary>
+        public LifetimeScope CreateChild(IInstaller installer = null)
+            => this.CreateChild<LifetimeScope>(installer);
+
+        /// <summary> Create a child scope with extra registrations </summary>
+        public TScope CreateChild<TScope>(Action<IContainerBuilder> installation)
+            where TScope : LifetimeScope
+            => this.CreateChild<TScope>(new ActionInstaller(installation));
+
+        /// <summary> Create a child scope with extra registrations </summary>
+        public LifetimeScope CreateChild(Action<IContainerBuilder> installation)
+            => this.CreateChild<LifetimeScope>(new ActionInstaller(installation));
+
+        /// <summary> Create a child scope with LifetimeScope prefab </summary>
+        public TScope CreateChildFromPrefab<TScope>(TScope prefab, IInstaller installer = null)
+            where TScope : LifetimeScope
+        {
+            var wasActive = prefab.gameObject.activeSelf;
+            if (wasActive)
+            {
+                prefab.gameObject.SetActive(false);
+            }
+            var child = Instantiate(prefab, this.transform, false);
+            if (installer != null)
+            {
+                child.localExtraInstallers.Add(installer);
+            }
+            child.parentReference.Object = this;
+            if (wasActive)
+            {
+                prefab.gameObject.SetActive(true);
+                child.gameObject.SetActive(true);
+            }
+            return child;
+        }
+
+        /// <summary> Create a child scope with LifetimeScope prefab and extra registrations </summary>
+        public TScope CreateChildFromPrefab<TScope>(TScope prefab, Action<IContainerBuilder> installation)
+            where TScope : LifetimeScope
+            => this.CreateChildFromPrefab(prefab, new ActionInstaller(installation));
+#endregion
         
         public IObjectResolver Container { get; private set; }
         public LifetimeScope Parent { get; private set; }
