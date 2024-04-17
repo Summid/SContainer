@@ -173,7 +173,7 @@ namespace SContainer.Runtime.Internal
             {
                 var allowNoConstructor = type.IsEnum;
                 
-                // It seems that Unity sometimes strips thr constructor of Component at build time.
+                // It seems that Unity sometimes strips the constructor of Component at build time.
                 // In that case, allow null.
                 allowNoConstructor |= type.IsSubclassOf(typeof(UnityEngine.Component));
                 if (!allowNoConstructor)
@@ -203,7 +203,7 @@ namespace SContainer.Runtime.Internal
                             foreach (var x in injectMethods)
                             {
                                 // MyClassA => MyClassB => MyClassC, B and C override method that declared in A.
-                                // 也就是说，忽略掉基类中被 [Inject] 标记的同名方法，下面的 Field、Prop 也是一样的
+                                // 考虑该方法是重写基类的虚方法的情况，用GetBaseDefinition
                                 if (x.MethodInfo.GetBaseDefinition() == methodInfo.GetBaseDefinition())
                                     goto EndMethod;
                             }
@@ -318,7 +318,7 @@ namespace SContainer.Runtime.Internal
                 {
                     foreach (var x in injectTypeInfo.InjectConstructorInfo.ParameterInfos)
                     {
-                        // 检查自身构造方法的参数，如果这个参数类型被注册，则检查循环依赖，即检查参数是否依赖自身
+                        // 检查自身构造方法的参数，如果这个参数类型被注册，则检查循环依赖，即检查参数是否依赖current
                         if (registry.TryGet(x.ParameterType, out var parameterRegistration))
                         {
                             CheckCircularDependencyRecursive(new DependencyInfo(parameterRegistration, current.Dependency, injectTypeInfo.InjectConstructorInfo.ConstructorInfo, x), registry, stack);
