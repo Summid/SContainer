@@ -110,6 +110,13 @@ namespace SContainer.Runtime
             if (this.hashTable.TryGet(interfaceType, out registration))
                 return registration != null;
 
+            // 一些特殊处理
+            if (interfaceType.IsConstructedGenericType)
+            {
+                var openGenericType = RuntimeTypeCache.OpenGenericTypeOf(interfaceType);
+                var typeParameters = RuntimeTypeCache.GenericTypeParametersOf(interfaceType);
+                return this.TryFallbackToSingleElementCollection(interfaceType, openGenericType, typeParameters, out registration);
+            }
             return false;
         }
 
@@ -124,6 +131,37 @@ namespace SContainer.Runtime
             }
 
             return this.hashTable.TryGet(type, out _);
+        }
+
+        /// <summary>
+        /// 只注册了一个（或者没有注册）类型，但解析时用的列表来接收实例化的对象，特殊处理
+        /// </summary>
+        private bool TryFallbackToSingleElementCollection(
+            Type closedGenericType,
+            Type openGenericType,
+            IReadOnlyList<Type> typeParameters,
+            out Registration newRegistration)
+        {
+            if (CollectionInstanceProvider.Match(openGenericType))
+            {
+                var elementType = typeParameters[0];
+                var collection = new CollectionInstanceProvider(elementType);
+                if (this.hashTable.TryGet(elementType, out var elementRegistration) && elementRegistration != null)
+                {
+                    collection.Add(elementRegistration);
+                }
+                newRegistration = new Registration(
+                    RuntimeTypeCache.ArrayTypeOf(elementType),
+                    Lifetime.Transient,
+                    new List<Type>
+                    {
+                        RuntimeTypeCache.EnumerableTypeOf(elementType),
+                        RuntimeTypeCache.ReadOnlyListTypeOf(elementType),
+                    }, collection);
+                return true;
+            }
+            newRegistration = null;
+            return false;
         }
     }
 }
