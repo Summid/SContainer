@@ -21,7 +21,56 @@ namespace SContainer.Runtime
         
         T Register<T>(T registrationBuilder) where T : RegistrationBuilder;
         void RegisterBuildCallback(Action<IObjectResolver> container);
-        bool Exists(Type type, bool includeInterfaceTypes = false);
+        bool Exists(Type type, bool includeInterfaceTypes = false, bool findParentScopes = false);
+    }
+
+    public sealed class ScopedContainerBuilder : ContainerBuilder
+    {
+        private readonly IObjectResolver root;
+        private readonly IScopedObjectResolver parent;
+
+        internal ScopedContainerBuilder(IObjectResolver root, IScopedObjectResolver parent)
+        {
+            this.root = root;
+            this.parent = parent;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IScopedObjectResolver BuildScope()
+        {
+            var registry = this.BuildRegistry();
+            var container = new ScopedContainer(registry, this.root, this.parent, this.ApplicationOrigin);
+            this.EmitCallback(container);
+            return container;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override IObjectResolver Build() => this.BuildScope();
+
+        public override bool Exists(Type type, bool includeInterfaceTypes = false, bool findParentScopes = false)
+        {
+            if (base.Exists(type, includeInterfaceTypes, findParentScopes))
+            {
+                return true;
+            }
+
+            if (findParentScopes)
+            {
+                var next = this.parent;
+                while (next != null)
+                {
+                    if (this.parent.TryGetRegistration(type, out var registration))
+                    {
+                        if (includeInterfaceTypes || registration.ImplementationType == type)
+                        {
+                            return true;
+                        }
+                    }
+                    next = next.Parent;
+                }
+            }
+            return false;
+        }
     }
 
     public class ContainerBuilder : IContainerBuilder
@@ -53,7 +102,7 @@ namespace SContainer.Runtime
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool Exists(Type type, bool includeInterfaceTypes)
+        public virtual bool Exists(Type type, bool includeInterfaceTypes = false, bool findParentScopes = false)
         {
             foreach (var registrationBuilder in this.registrationBuilders)
             {
