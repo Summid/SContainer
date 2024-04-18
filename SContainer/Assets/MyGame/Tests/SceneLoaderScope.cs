@@ -9,7 +9,7 @@ namespace MyGame
         {
             builder.Register(new RegistrationBuilder(typeof(MainScenePresenter), Lifetime.Singleton));
             
-            // builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Scoped));
+            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Scoped));
         }
     }
 }

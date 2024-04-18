@@ -7,16 +7,19 @@ namespace MyGame
 {
     public class MainScenePresenter
     {
-        // [Inject]
-        // public void InjectEnemy(EnemyService enemyService)
-        // {
-        //     enemyService.Attack();
-        // }
-
         [Inject]
-        public void InjectMainView(MainView mainView)
+        public void InjectEnemy(IEnumerable<EnemyService> services)
         {
-            mainView.Dump();
+            foreach (EnemyService enemyService in services)
+            {
+                enemyService.Attack();
+            }
         }
+
+        // [Inject]
+        // public void InjectMainView(MainView mainView)
+        // {
+        //     mainView.Dump();
+        // }
     }
 }
