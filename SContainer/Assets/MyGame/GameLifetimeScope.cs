@@ -13,9 +13,9 @@ namespace MyGame
             builder.Register(new RegistrationBuilder(typeof(CharacterService), Lifetime.Singleton).As<IDisposable>());
             
             // 重复注册的类型不能是单例类型
-            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Transient));
-            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Transient));
-            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Transient));
+            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Scoped));
+            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Scoped));
+            builder.Register(new RegistrationBuilder(typeof(EnemyService), Lifetime.Scoped));
         }
     }
 }
