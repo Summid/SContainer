@@ -36,13 +36,13 @@ namespace SContainer.Runtime
         /// </remarks>
         object Resolve(Registration registration);
         IScopedObjectResolver CreateScope(Action<IContainerBuilder> installation = null);
+        bool TryGetRegistration(Type type, out Registration registration);
     }
 
     public interface IScopedObjectResolver : IObjectResolver
     {
         IObjectResolver Root { get; }
         IScopedObjectResolver Parent { get; }
-        bool TryGetRegistration(Type type, out Registration registration);
     }
 
     public enum Lifetime
@@ -203,6 +203,10 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IScopedObjectResolver CreateScope(Action<IContainerBuilder> installation = null)
             => this.rootScope.CreateScope(installation);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryGetRegistration(Type type, out Registration registration)
+            => this.registry.TryGet(type, out registration);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
