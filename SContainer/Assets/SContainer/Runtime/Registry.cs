@@ -115,7 +115,8 @@ namespace SContainer.Runtime
             {
                 var openGenericType = RuntimeTypeCache.OpenGenericTypeOf(interfaceType);
                 var typeParameters = RuntimeTypeCache.GenericTypeParametersOf(interfaceType);
-                return this.TryFallbackToSingleElementCollection(interfaceType, openGenericType, typeParameters, out registration);
+                return this.TryFallbackToSingleElementCollection(interfaceType, openGenericType, typeParameters, out registration) ||
+                    this.TryFallbackContainerLocal(interfaceType, openGenericType, typeParameters, out registration);
             }
             return false;
         }
@@ -159,6 +160,29 @@ namespace SContainer.Runtime
                         RuntimeTypeCache.ReadOnlyListTypeOf(elementType),
                     }, collection);
                 return true;
+            }
+            newRegistration = null;
+            return false;
+        }
+
+        /// <summary>
+        /// ContainerLocal 包装的类型，特殊处理
+        /// </summary>
+        private bool TryFallbackContainerLocal(
+            Type closedGenericType,
+            Type openGenericType,
+            IReadOnlyList<Type> typeParameters,
+            out Registration newRegistration)
+        {
+            if (openGenericType == typeof(ContainerLocal<>))
+            {
+                var valueType = typeParameters[0];
+                if (this.TryGet(valueType, out var valueRegistration))
+                {
+                    var spawner = new ContainerLocalInstanceProvider(closedGenericType, valueRegistration);
+                    newRegistration = new Registration(closedGenericType, Lifetime.Scoped, null, spawner);
+                    return true;
+                }
             }
             newRegistration = null;
             return false;
