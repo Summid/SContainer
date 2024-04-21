@@ -23,4 +23,31 @@ namespace SContainer.Runtime.Unity
             this.lifetime = lifetime;
         }
     }
+
+    public static class ContainerBuilderUnityExtensions
+    {
+        public static void UseEntryPoints(
+            this IContainerBuilder builder,
+            Action<EntryPointsBuilder> configuration)
+        {
+            builder.UseEntryPoints(Lifetime.Singleton, configuration);
+        }
+        
+        public static void UseEntryPoints(
+            this IContainerBuilder builder,
+            Lifetime lifetime,
+            Action<EntryPointsBuilder> configuration)
+        {
+            EntryPointsBuilder.EnsureDispatcherRegistered(builder);
+            configuration(new EntryPointsBuilder(builder, lifetime));
+        }
+
+        public static RegistrationBuilder RegisterEntryPoint<T>(
+            this IContainerBuilder builder,
+            Lifetime lifetime = Lifetime.Singleton)
+        {
+            EntryPointsBuilder.EnsureDispatcherRegistered(builder);
+            return builder.Register<T>(lifetime).AsImplementedInterfaces();
+        }
+    }
 }
