@@ -15,6 +15,7 @@ namespace SContainer.Runtime.Internal
         public InjectConstructorInfo(ConstructorInfo constructorInfo)
         {
             this.ConstructorInfo = constructorInfo;
+            this.ParameterInfos = constructorInfo.GetParameters();
         }
 
         public InjectConstructorInfo(ConstructorInfo constructorInfo, ParameterInfo[] parameterInfos)
