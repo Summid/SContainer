@@ -193,6 +193,8 @@ namespace SContainer.Runtime.Unity
                     dest[i] = source[i - 1];
                 }
             }
+
+            parentSystem.subSystemList = dest;
         }
     }
 }
