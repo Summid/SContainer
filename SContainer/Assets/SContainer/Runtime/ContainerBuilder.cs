@@ -125,7 +125,7 @@ namespace SContainer.Runtime
 
         protected Registry BuildRegistry()
         {
-            var registrations = new Registration[this.registrationBuilders.Count];
+            var registrations = new Registration[this.registrationBuilders.Count + 1];
 
             for (var i = 0; i < this.registrationBuilders.Count; i++)
             {
@@ -133,6 +133,12 @@ namespace SContainer.Runtime
                 var registration = registrationBuilder.Build();
                 registrations[i] = registration;
             }
+
+            registrations[registrations.Length - 1] = new Registration(
+                typeof(IObjectResolver),
+                Lifetime.Transient,
+                null,
+                ContainerInstanceProvider.Default);
 
             var registry = Registry.Build(registrations);
             TypeAnalyzer.CheckCircularDependency(registrations, registry);
