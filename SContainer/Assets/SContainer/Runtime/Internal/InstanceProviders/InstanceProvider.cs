@@ -2,7 +2,7 @@
 
 namespace SContainer.Runtime.Internal
 {
-    public class InstanceProvider : IInstanceProvider
+    internal sealed class InstanceProvider : IInstanceProvider
     {
         private readonly IInjector injector;
 
