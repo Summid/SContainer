@@ -22,6 +22,12 @@ namespace SContainer.Runtime.Unity
             this.containerBuilder = containerBuilder;
             this.lifetime = lifetime;
         }
+
+        public RegistrationBuilder Add<T>()
+            => this.containerBuilder.Register<T>(this.lifetime).AsImplementedInterfaces();
+
+        public void OnException(Action<Exception> exceptionHandler)
+            => this.containerBuilder.RegisterEntryPointExceptionHandler(exceptionHandler);
     }
 
     public static class ContainerBuilderUnityExtensions
@@ -48,6 +54,13 @@ namespace SContainer.Runtime.Unity
         {
             EntryPointsBuilder.EnsureDispatcherRegistered(builder);
             return builder.Register<T>(lifetime).AsImplementedInterfaces();
+        }
+
+        public static void RegisterEntryPointExceptionHandler(
+            this IContainerBuilder builder,
+            Action<Exception> exceptionHandler)
+        {
+            builder.RegisterInstance(new EntryPointExceptionHandler(exceptionHandler));
         }
     }
 }
