@@ -253,6 +253,9 @@ namespace SContainer.Runtime.Unity
                     installer.Install(builder);
                 }
             }
+
+            builder.RegisterInstance<LifetimeScope>(this).AsSelf();
+            EntryPointsBuilder.EnsureDispatcherRegistered(builder);
         }
 
         private LifetimeScope GetRuntimeParent()
