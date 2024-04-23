@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -25,7 +26,7 @@ namespace SContainer.Runtime.Internal
         /// <summary>
         /// 创建实例，并注入[Inject]依赖
         /// </summary>
-        public object CreateInstance(IObjectResolver resolver)
+        public object CreateInstance(IObjectResolver resolver, IReadOnlyList<IInjectParameter> parameters)
         {
             var parameterInfos = this.injectTypeInfo.InjectConstructorInfo.ParameterInfos;
             var parameterValues = CappedArrayPool<object>.Shared8Limit.Rent(parameterInfos.Length);
@@ -34,10 +35,13 @@ namespace SContainer.Runtime.Internal
                 for (var i = 0; i < parameterInfos.Length; i++)
                 {
                     var parameterInfo = parameterInfos[i];
-                    parameterValues[i] = resolver.Resolve(parameterInfo.ParameterType);
+                    parameterValues[i] = resolver.ResolveOrParameter(
+                        parameterInfo.ParameterType,
+                        parameterInfo.Name,
+                        parameters);
                 }
                 var instance = this.injectTypeInfo.InjectConstructorInfo.ConstructorInfo.Invoke(parameterValues);
-                this.Inject(instance, resolver);
+                this.Inject(instance, resolver, parameters);
                 return instance;
             }
             catch (SContainerException ex)
@@ -54,38 +58,38 @@ namespace SContainer.Runtime.Internal
         /// 只注入字段、属性和方法
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Inject(object instance, IObjectResolver resolver)
+        public void Inject(object instance, IObjectResolver resolver, IReadOnlyList<IInjectParameter> parameters)
         {
-            this.InjectFields(instance, resolver);
-            this.InjectProperties(instance, resolver);
-            this.InjectMethods(instance, resolver);
+            this.InjectFields(instance, resolver, parameters);
+            this.InjectProperties(instance, resolver, parameters);
+            this.InjectMethods(instance, resolver, parameters);
         }
 
-        private void InjectFields(object obj, IObjectResolver resolver)
+        private void InjectFields(object obj, IObjectResolver resolver, IReadOnlyList<IInjectParameter> parameters)
         {
             if (this.injectTypeInfo.InjectFields == null)
                 return;
 
             foreach (var x in this.injectTypeInfo.InjectFields)
             {
-                var fieldValue = resolver.Resolve(x.FieldType);
+                var fieldValue = resolver.ResolveOrParameter(x.FieldType, x.Name, parameters);
                 x.SetValue(obj, fieldValue);
             }
         }
 
-        private void InjectProperties(object obj, IObjectResolver resolver)
+        private void InjectProperties(object obj, IObjectResolver resolver, IReadOnlyList<IInjectParameter> parameters)
         {
             if (this.injectTypeInfo.InjectProperties == null)
                 return;
 
             foreach (var x in this.injectTypeInfo.InjectProperties)
             {
-                var propValue = resolver.Resolve(x.PropertyType);
+                var propValue = resolver.ResolveOrParameter(x.PropertyType, x.Name, parameters);
                 x.SetValue(obj, propValue);
             }
         }
 
-        private void InjectMethods(object obj, IObjectResolver resolver)
+        private void InjectMethods(object obj, IObjectResolver resolver, IReadOnlyList<IInjectParameter> parameters)
         {
             if (this.injectTypeInfo.InjectMethodInfos == null)
                 return;
@@ -99,7 +103,10 @@ namespace SContainer.Runtime.Internal
                     for (var i = 0; i < parameterInfos.Length; i++)
                     {
                         var parameterInfo = parameterInfos[i];
-                        parameterValues[i] = resolver.Resolve(parameterInfo.ParameterType);
+                        parameterValues[i] = resolver.ResolveOrParameter(
+                            parameterInfo.ParameterType,
+                            parameterInfo.Name,
+                            parameters);
                     }
                     method.MethodInfo.Invoke(obj, parameterValues);
                 }
