@@ -138,7 +138,7 @@ namespace SContainer.Runtime
             var lazy = this.sharedInstances.GetOrAdd(registration, this.createInstance);
             var created = lazy.IsValueCreated;
             var instance = lazy.Value;
-            if (!created && instance is IDisposable disposable)
+            if (!created && instance is IDisposable disposable && !(registration.Provider is ExistingInstanceProvider))
             {
                 this.disposables.Add(disposable);
             }
@@ -223,7 +223,7 @@ namespace SContainer.Runtime
             {
                 case Lifetime.Singleton:
                     var singleton = this.sharedInstances.GetOrAdd(registration, this.createInstance);
-                    if (!singleton.IsValueCreated && singleton.Value is IDisposable disposable)
+                    if (!singleton.IsValueCreated && singleton.Value is IDisposable disposable && !(registration.Provider is ExistingInstanceProvider))
                     {
                         // 第一次调用（先判断IsValueCreated），添加进 disposables
                         this.disposables.Add(disposable);
