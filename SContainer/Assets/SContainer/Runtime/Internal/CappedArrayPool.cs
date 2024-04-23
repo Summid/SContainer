@@ -51,7 +51,7 @@ namespace SContainer.Runtime.Internal
             {
                 var bucket = this.buckets[i];
                 var tail = this.tails[i];
-                if (tail >= this.buckets.Length)
+                if (tail >= bucket.Length)
                 {
                     Array.Resize(ref bucket, bucket.Length * 2);
                     this.buckets[i] = bucket;
