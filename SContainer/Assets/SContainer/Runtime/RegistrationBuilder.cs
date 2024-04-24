@@ -10,6 +10,7 @@ namespace SContainer.Runtime
         internal protected readonly Lifetime Lifetime;
 
         internal protected List<Type> InterfaceTypes;
+        internal protected List<IInjectParameter> Parameters;
         
         public RegistrationBuilder(Type implementationType, Lifetime lifetime)
         {
@@ -20,7 +21,7 @@ namespace SContainer.Runtime
         public virtual Registration Build()
         {
             var injector = InjectorCache.GetOrBuild(this.ImplementationType);
-            var spawner = new InstanceProvider(injector);
+            var spawner = new InstanceProvider(injector, this.Parameters);
             return new Registration(
                 this.ImplementationType,
                 this.Lifetime,
@@ -82,6 +83,49 @@ namespace SContainer.Runtime
                 this.AddInterfaceType(interfaceType);
             }
             return this;
+        }
+
+        public RegistrationBuilder WithParameter(string name, object value)
+        {
+            this.Parameters = this.Parameters ?? new List<IInjectParameter>();
+            this.Parameters.Add(new NamedParameter(name, value));
+            return this;
+        }
+
+        public RegistrationBuilder WithParameter(string name, Func<IObjectResolver, object> value)
+        {
+            this.Parameters = this.Parameters ?? new List<IInjectParameter>();
+            this.Parameters.Add(new FuncNamedParameter(name, value));
+            return this;
+        }
+
+        public RegistrationBuilder WithParameter(Type type, object value)
+        {
+            this.Parameters = this.Parameters ?? new List<IInjectParameter>();
+            this.Parameters.Add(new TypedParameter(type, value));
+            return this;
+        }
+
+        public RegistrationBuilder WithParameter(Type type, Func<IObjectResolver, object> value)
+        {
+            this.Parameters = this.Parameters ?? new List<IInjectParameter>();
+            this.Parameters.Add(new FuncTypedParameter(type, value));
+            return this;
+        }
+
+        public RegistrationBuilder WithParameter<TParam>(TParam value)
+        {
+            return this.WithParameter(typeof(TParam), value);
+        }
+
+        public RegistrationBuilder WithParameter<TParam>(Func<IObjectResolver, TParam> value)
+        {
+            return this.WithParameter(typeof(TParam), resolver => value(resolver));
+        }
+
+        public RegistrationBuilder WithParameter<TParam>(Func<TParam> value)
+        {
+            return this.WithParameter(typeof(TParam), _ => value);
         }
         
         protected void AddInterfaceType(Type interfaceType)
