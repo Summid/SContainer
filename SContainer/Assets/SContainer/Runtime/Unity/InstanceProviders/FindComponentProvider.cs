@@ -47,7 +47,7 @@ namespace SContainer.Runtime.Unity
                     component = gameObject.GetComponentInChildren(this.componentType, true);
                     if (component != null) break;
                 }
-                if (component != null)
+                if (component == null)
                 {
                     throw new SContainerException(this.componentType, $"{this.componentType} is not in this scene {this.scene.path} : {this}");
                 }
