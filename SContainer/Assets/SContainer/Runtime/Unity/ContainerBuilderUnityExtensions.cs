@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 namespace SContainer.Runtime.Unity
 {
@@ -32,6 +33,7 @@ namespace SContainer.Runtime.Unity
 
     public static class ContainerBuilderUnityExtensions
     {
+#region EntryPoint
         public static void UseEntryPoints(
             this IContainerBuilder builder,
             Action<EntryPointsBuilder> configuration)
@@ -62,5 +64,104 @@ namespace SContainer.Runtime.Unity
         {
             builder.RegisterInstance(new EntryPointExceptionHandler(exceptionHandler));
         }
+#endregion
+
+#region UnityComponent
+
+        public static RegistrationBuilder RegisterComponent<TInterface>(
+            this IContainerBuilder builder,
+            TInterface component)
+        {
+            var registrationBuilder = new ComponentRegistrationBuilder(component).As(typeof(TInterface));
+            // Force inject execution (invoke provider.SpawnInstance)
+            builder.RegisterBuildCallback(container => container.Resolve<TInterface>());
+            return builder.Register(registrationBuilder);
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInHierarchy(
+            this IContainerBuilder builder,
+            Type type)
+        {
+            var lifetimeScope = (LifetimeScope)builder.ApplicationOrigin;
+            var scene = lifetimeScope.gameObject.scene;
+
+            var registrationBuilder = new ComponentRegistrationBuilder(scene, type);
+            // Force inject execution (invoke provider.SpawnInstance)
+            builder.RegisterBuildCallback(
+                container =>
+                {
+                    container.Resolve(
+                        registrationBuilder.InterfaceTypes != null
+                            ? registrationBuilder.InterfaceTypes[0]
+                            : registrationBuilder.ImplementationType
+                    );
+                }
+            );
+            return builder.Register(registrationBuilder);
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInHierarchy<T>(this IContainerBuilder builder)
+        {
+            return builder.RegisterComponentInHierarchy(typeof(T));
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentOnNewGameObject(
+            this IContainerBuilder builder,
+            Type type,
+            Lifetime lifetime,
+            string newGameObjectName = null)
+        {
+            return builder.Register(new ComponentRegistrationBuilder(newGameObjectName, type, lifetime));
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentOnNewGameObject<T>(
+            this IContainerBuilder builder,
+            Lifetime lifetime,
+            string newGameObjectName = null)
+            where T : Component
+        {
+            return builder.RegisterComponentOnNewGameObject(typeof(T), lifetime, newGameObjectName);
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInNewPrefab(
+            this IContainerBuilder builder,
+            Type interfaceType,
+            Component prefab,
+            Lifetime lifetime)
+        {
+            var componentRegistrationBuilder = builder.Register(new ComponentRegistrationBuilder(_ => prefab, prefab.GetType(), lifetime));
+            componentRegistrationBuilder.As(interfaceType);
+            return componentRegistrationBuilder;
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInNewPrefab<T>(
+            this IContainerBuilder builder,
+            T prefab,
+            Lifetime lifetime)
+            where T : Component
+        {
+            return builder.RegisterComponentInNewPrefab(typeof(T), prefab, lifetime);
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInNewPrefab<T>(
+            this IContainerBuilder builder,
+            Func<IObjectResolver, T> prefab,
+            Lifetime lifetime)
+            where T : Component
+        {
+            return builder.Register(new ComponentRegistrationBuilder(prefab, typeof(T), lifetime));
+        }
+
+        public static ComponentRegistrationBuilder RegisterComponentInNewPrefab<TInterface, TImplement>(
+            this IContainerBuilder builder,
+            Func<IObjectResolver, TImplement> prefab,
+            Lifetime lifetime)
+            where TImplement : Component, TInterface
+        {
+            var componentRegistrationBuilder = builder.Register(new ComponentRegistrationBuilder(prefab, typeof(TImplement), lifetime));
+            componentRegistrationBuilder.As<TInterface>();
+            return componentRegistrationBuilder;
+        }
+#endregion
     }
 }
