@@ -9,6 +9,11 @@ namespace MyGame
         private HelloWorldService helloWorldService;
         private CharacterService characterService;
 
+        public GamePresenter(string str)
+        {
+            UnityEngine.Debug.Log($"str is {str}");
+        }
+
         [Inject]
         public void InjectService(IEnumerable<IDisposable> disposables)
         {
