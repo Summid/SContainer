@@ -51,6 +51,9 @@ namespace SContainer.Runtime.Unity
         [SerializeField]
         public bool autoRun = true;
 
+        [SerializeField]
+        protected List<GameObject> autoInjectGameObjects;
+
         private static readonly Stack<LifetimeScope> GlobalOverrideParents = new Stack<LifetimeScope>(); // EnqueueParent(Scope)'s cache
         private static readonly Stack<IInstaller> GlobalExtraInstallers = new Stack<IInstaller>(); // Enqueue(Action<builder>)'s cache
         private static readonly object SyncRoot = new object();
@@ -232,6 +235,7 @@ namespace SContainer.Runtime.Unity
         private void SetContainer(IObjectResolver container)
         {
             this.Container = container;
+            this.AutoInjectAll();
         }
 
         private void InstallTo(IContainerBuilder builder)
@@ -292,6 +296,20 @@ namespace SContainer.Runtime.Unity
         private static LifetimeScope Find(Type type)
         {
             return (LifetimeScope)FindObjectOfType(type);
+        }
+
+        private void AutoInjectAll()
+        {
+            if (this.autoInjectGameObjects == null)
+                return;
+
+            foreach (var target in this.autoInjectGameObjects)
+            {
+                if (target != null) // Check miss reference
+                {
+                    this.Container.InjectGameObject(target);
+                }
+            }
         }
     }
 }

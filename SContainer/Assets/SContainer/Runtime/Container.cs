@@ -36,6 +36,7 @@ namespace SContainer.Runtime
         /// </remarks>
         object Resolve(Registration registration);
         IScopedObjectResolver CreateScope(Action<IContainerBuilder> installation = null);
+        void Inject(object instance);
         bool TryGetRegistration(Type type, out Registration registration);
     }
 
@@ -97,6 +98,13 @@ namespace SContainer.Runtime
             };
             installation?.Invoke(containerBuilder);
             return containerBuilder.BuildScope();
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Inject(object instance)
+        {
+            var injector = InjectorCache.GetOrBuild(instance.GetType());
+            injector.Inject(instance, this, null);
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -203,6 +211,13 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IScopedObjectResolver CreateScope(Action<IContainerBuilder> installation = null)
             => this.rootScope.CreateScope(installation);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Inject(object instance)
+        {
+            var injector = InjectorCache.GetOrBuild(instance.GetType());
+            injector.Inject(instance, this, null);
+        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryGetRegistration(Type type, out Registration registration)
