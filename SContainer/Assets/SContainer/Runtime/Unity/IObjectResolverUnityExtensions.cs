@@ -34,5 +34,227 @@ namespace SContainer.Runtime.Unity
 
             InjectGameObjectRecursive(gameObject);
         }
+
+#region LifetimeScope Instantiate
+
+        private static T Instantiate<T>(this LifetimeScope scope, T prefab, Vector3 position, Quaternion rotation)
+            where T : Component
+        {
+            var wasActive = prefab.gameObject.activeSelf;
+            prefab.gameObject.SetActive(false);
+
+            T instance;
+            if (scope.IsRoot)
+            {
+                instance = UnityEngine.Object.Instantiate(prefab, position, rotation);
+                UnityEngine.Object.DontDestroyOnLoad(instance);
+            }
+            else
+            {
+                // Into the same scene as LifetimeScope
+                instance = UnityEngine.Object.Instantiate(prefab, position, rotation, scope.transform);
+                instance.transform.SetParent(null);
+            }
+            
+            SetName(instance, prefab);
+            
+            try
+            {
+                scope.Container.InjectGameObject(instance.gameObject);
+            }
+            finally
+            {
+                prefab.gameObject.SetActive(wasActive);
+                instance.gameObject.SetActive(wasActive);
+            }
+
+            return instance;
+        }
+        
+        private static GameObject Instantiate(this LifetimeScope scope, GameObject prefab, Vector3 position, Quaternion rotation)
+        {
+            var wasActive = prefab.activeSelf;
+            prefab.SetActive(false);
+
+            GameObject instance;
+            if (scope.IsRoot)
+            {
+                instance = UnityEngine.Object.Instantiate(prefab, position, rotation);
+                UnityEngine.Object.DontDestroyOnLoad(instance);
+            }
+            else
+            {
+                // Into the same scene as LifetimeScope
+                instance = UnityEngine.Object.Instantiate(prefab, position, rotation, scope.transform);
+                instance.transform.SetParent(null);
+            }
+
+            SetName(instance, prefab);
+
+            try
+            {
+                scope.Container.InjectGameObject(instance);
+            }
+            finally
+            {
+                prefab.SetActive(wasActive);
+                instance.SetActive(wasActive);
+            }
+
+            return instance;
+        }
+
+#endregion
+
+#region IObjectResolver Instantiate
+
+        public static T Instantiate<T>(this IObjectResolver resolver, T prefab)
+            where T : Component
+        {
+            return resolver.Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
+        }
+
+        public static T Instantiate<T>(
+            this IObjectResolver resolver,
+            T prefab,
+            Transform parent,
+            bool worldPositionStays = false)
+            where T : Component
+        {
+            var wasActive = prefab.gameObject.activeSelf;
+            prefab.gameObject.SetActive(false);
+
+            var instance = UnityEngine.Object.Instantiate(prefab, parent, worldPositionStays);
+
+            SetName(prefab, instance);
+
+            try
+            {
+                resolver.InjectGameObject(instance.gameObject);
+            }
+            finally
+            {
+                prefab.gameObject.SetActive(wasActive);
+                instance.gameObject.SetActive(wasActive);
+            }
+
+            return instance;
+        }
+
+        public static T Instantiate<T>(
+            this IObjectResolver resolver,
+            T prefab,
+            Vector3 position,
+            Quaternion rotation)
+            where T : Component
+        {
+            if (resolver.ApplicationOrigin is LifetimeScope scope)
+            {
+                return scope.Instantiate(prefab, position, rotation);
+            }
+
+            return resolver.Instantiate(prefab, position, rotation, null);
+        }
+        
+        public static T Instantiate<T>(
+            this IObjectResolver resolver,
+            T prefab,
+            Vector3 position,
+            Quaternion rotation,
+            Transform parent)
+            where T : Component
+        {
+            var wasActive = prefab.gameObject.activeSelf;
+            prefab.gameObject.SetActive(false);
+
+            var instance = UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
+
+            SetName(instance, prefab);
+
+            try
+            {
+                resolver.InjectGameObject(instance.gameObject);
+            }
+            finally
+            {
+                prefab.gameObject.SetActive(wasActive);
+                instance.gameObject.SetActive(wasActive);
+            }
+
+            return instance;
+        }
+
+        public static GameObject Instantiate(this IObjectResolver resolver, GameObject prefab)
+        {
+            return resolver.Instantiate(prefab, prefab.transform.position, prefab.transform.rotation);
+        }
+        
+        public static GameObject Instantiate(
+            this IObjectResolver resolver,
+            GameObject prefab,
+            Transform parent,
+            bool worldPositionStays = false)
+        {
+            var wasActive = prefab.activeSelf;
+            prefab.SetActive(false);
+
+            var instance = UnityEngine.Object.Instantiate(prefab, parent, worldPositionStays);
+            
+            SetName(instance, prefab);
+
+            resolver.InjectGameObject(instance);
+
+            prefab.SetActive(wasActive);
+            instance.SetActive(wasActive);
+
+            return instance;
+        }
+        
+        public static GameObject Instantiate(
+            this IObjectResolver resolver,
+            GameObject prefab,
+            Vector3 position,
+            Quaternion rotation)
+        {
+            if (resolver.ApplicationOrigin is LifetimeScope scope)
+            {
+                return scope.Instantiate(prefab, position, rotation);
+            }
+
+            return resolver.Instantiate(prefab, position, rotation, null);
+        }
+        
+        public static GameObject Instantiate(
+            this IObjectResolver resolver,
+            GameObject prefab,
+            Vector3 position,
+            Quaternion rotation,
+            Transform parent)
+        {
+            var wasActive = prefab.activeSelf;
+            prefab.SetActive(false);
+
+            var instance = UnityEngine.Object.Instantiate(prefab, position, rotation, parent);
+
+            SetName(instance, prefab);
+
+            try
+            {
+                resolver.InjectGameObject(instance);
+            }
+            finally
+            {
+                prefab.SetActive(wasActive);
+                instance.SetActive(wasActive);
+            }
+
+            return instance;
+        }
+        
+#endregion
+        private static void SetName(UnityEngine.Object instance, UnityEngine.Object prefab)
+        {
+            //TODO set instance's name according to the settings
+        }
     }
 }
