@@ -67,7 +67,19 @@ namespace SContainer.Runtime.Unity
 #endregion
 
 #region UnityComponent
+        public static void UseComponents(this IContainerBuilder builder, Action<ComponentsBuilder> configuration)
+        {
+            configuration(new ComponentsBuilder(builder));
+        }
 
+        public static void UseComponent(
+            this IContainerBuilder builder,
+            Transform root,
+            Action<ComponentsBuilder> configuration)
+        {
+            configuration(new ComponentsBuilder(builder, root));
+        }
+        
         public static RegistrationBuilder RegisterComponent<TInterface>(
             this IContainerBuilder builder,
             TInterface component)
@@ -163,5 +175,39 @@ namespace SContainer.Runtime.Unity
             return componentRegistrationBuilder;
         }
 #endregion
+    }
+
+    /// <summary>
+    /// Supports grouping MonoBehaviour's registration.
+    /// </summary>
+    public readonly struct ComponentsBuilder
+    {
+        private readonly IContainerBuilder containerBuilder;
+        private readonly Transform parentTransform;
+
+        public ComponentsBuilder(IContainerBuilder containerBuilder, Transform parentTransform = null)
+        {
+            this.containerBuilder = containerBuilder;
+            this.parentTransform = parentTransform;
+        }
+
+        public RegistrationBuilder AddInstance<TInterface>(TInterface component)
+        {
+            return this.containerBuilder.RegisterComponent(component);
+        }
+
+        public ComponentRegistrationBuilder AddInHierarchy<T>()
+            => this.containerBuilder.RegisterComponentInHierarchy<T>()
+                .UnderTransform(this.parentTransform);
+
+        public ComponentRegistrationBuilder AddOnNewGameObject<T>(Lifetime lifetime, string newGameObjectName = null)
+            where T : Component
+            => this.containerBuilder.RegisterComponentOnNewGameObject<T>(lifetime, newGameObjectName)
+                .UnderTransform(this.parentTransform);
+
+        public ComponentRegistrationBuilder AddInNewPrefab<T>(T prefab, Lifetime lifetime)
+            where T : Component
+            => this.containerBuilder.RegisterComponentInNewPrefab(prefab, lifetime)
+                .UnderTransform(this.parentTransform);
     }
 }
