@@ -59,7 +59,7 @@ namespace SContainer.Runtime
                 var next = this.parent;
                 while (next != null)
                 {
-                    if (this.parent.TryGetRegistration(type, out var registration))
+                    if (next.TryGetRegistration(type, out var registration))
                     {
                         if (includeInterfaceTypes || registration.ImplementationType == type)
                         {
