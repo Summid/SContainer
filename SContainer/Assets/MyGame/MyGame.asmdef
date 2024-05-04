@@ -1,6 +1,6 @@
 {
     "name": "MyGame",
-    "rootNamespace": "",
+    "rootNamespace": "MyGame",
     "references": [
         "GUID:79be1de2d445cc348b62a98c25d3435c"
     ],
