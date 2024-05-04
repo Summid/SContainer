@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace SContainer.Runtime.Unity
 {
-    public class SContainerSettings : ScriptableObject
+    public sealed class SContainerSettings : ScriptableObject
     {
         public static SContainerSettings Instance { get; private set; }
         public static bool DiagnosticsEnabled => Instance != null && Instance.EnableDiagnostics;
