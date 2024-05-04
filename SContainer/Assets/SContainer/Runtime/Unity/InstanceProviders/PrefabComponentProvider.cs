@@ -38,6 +38,9 @@ namespace SContainer.Runtime.Unity
                 ? UnityEngine.Object.Instantiate(prefab, parent)
                 : UnityEngine.Object.Instantiate(prefab);
 
+            if (SContainerSettings.Instance != null && SContainerSettings.Instance.RemoveClonePostfix)
+                component.name = prefab.name;
+
             try
             {
                 this.injector.Inject(component, resolver, this.customParameters);

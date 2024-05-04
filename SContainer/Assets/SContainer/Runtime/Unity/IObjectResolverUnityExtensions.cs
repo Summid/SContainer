@@ -258,7 +258,8 @@ namespace SContainer.Runtime.Unity
 #endregion
         private static void SetName(UnityEngine.Object instance, UnityEngine.Object prefab)
         {
-            //TODO set instance's name according to the settings
+            if (SContainerSettings.Instance != null && SContainerSettings.Instance.RemoveClonePostfix)
+                instance.name = prefab.name;
         }
     }
 }
