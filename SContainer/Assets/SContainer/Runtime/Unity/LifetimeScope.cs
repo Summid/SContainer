@@ -54,6 +54,8 @@ namespace SContainer.Runtime.Unity
         [SerializeField]
         protected List<GameObject> autoInjectGameObjects;
 
+        private string scopeName;
+
         private static readonly Stack<LifetimeScope> GlobalOverrideParents = new Stack<LifetimeScope>(); // EnqueueParent(Scope)'s cache
         private static readonly Stack<IInstaller> GlobalExtraInstallers = new Stack<IInstaller>(); // Enqueue(Action<builder>)'s cache
         private static readonly object SyncRoot = new object();
@@ -156,13 +158,18 @@ namespace SContainer.Runtime.Unity
         
         public IObjectResolver Container { get; private set; }
         public LifetimeScope Parent { get; private set; }
-        public bool IsRoot { get; set; } // TODO: assign in settings
+        public bool IsRoot => SContainerSettings.Instance != null &&
+            SContainerSettings.Instance.IsRootLifetimeScopeInstance(this);
 
         // when create a child scope with a installer, cache the installer in this first.
         private readonly List<IInstaller> localExtraInstallers = new List<IInstaller>();
 
         protected virtual void Awake()
         {
+            if (SContainerSettings.DiagnosticsEnabled && string.IsNullOrEmpty(this.scopeName))
+            {
+                this.scopeName = $"{this.name} ({this.gameObject.GetInstanceID()})";
+            }
             try
             {
                 this.Parent = this.GetRuntimeParent();
@@ -200,6 +207,10 @@ namespace SContainer.Runtime.Unity
             this.Container?.Dispose();
             this.Container = null;
             CancelAwake(this);
+            if (SContainerSettings.DiagnosticsEnabled)
+            {
+                //todo Remove diagnostics collector
+            }
         }
 
         protected virtual void Configure(IContainerBuilder builder) { }
@@ -211,10 +222,18 @@ namespace SContainer.Runtime.Unity
 
             if (this.Parent != null)
             {
+                if (SContainerSettings.Instance != null && this.Parent.IsRoot)
+                {
+                    if (this.Parent.Container == null)
+                        this.Parent.Build();
+                }
+                
+                // ReSharper disable once PossibleNullReferenceException
                 this.Parent.Container.CreateScope(builder =>
                 {
                     builder.RegisterBuildCallback(this.SetContainer);
                     builder.ApplicationOrigin = this;
+                    // todo set builder's diagnostics
                     this.InstallTo(builder);
                 });
             }
@@ -223,6 +242,7 @@ namespace SContainer.Runtime.Unity
                 var builder = new ContainerBuilder
                 {
                     ApplicationOrigin = this,
+                    // todo set builder's diagnostics
                 };
                 builder.RegisterBuildCallback(this.SetContainer);
                 this.InstallTo(builder);
@@ -288,6 +308,12 @@ namespace SContainer.Runtime.Unity
                 {
                     return GlobalOverrideParents.Peek();
                 }
+            }
+
+            // Find root from settings
+            if (SContainerSettings.Instance != null)
+            {
+                return SContainerSettings.Instance.GetOrCreateRootLifetimeScopeInstance();
             }
             
             return null;
