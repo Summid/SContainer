@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SContainer.Editor.Diagnostics
 {
-    public static class TypeNameHelper
+    internal static class TypeNameHelper
     {
         private static readonly IReadOnlyDictionary<Type, string> TypeAlias = new Dictionary<Type, string>
         {
