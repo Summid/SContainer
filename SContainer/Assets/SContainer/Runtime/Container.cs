@@ -1,4 +1,5 @@
-﻿using SContainer.Runtime.Internal;
+﻿using SContainer.Runtime.Diagnostics;
+using SContainer.Runtime.Internal;
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,7 @@ namespace SContainer.Runtime
     public interface IObjectResolver : IDisposable
     {
         object ApplicationOrigin { get; }
+        DiagnosticsCollector Diagnostics { get; set; }
 
         /// <summary>
         /// Resolve from type.
@@ -58,6 +60,7 @@ namespace SContainer.Runtime
         public IObjectResolver Root { get; }
         public IScopedObjectResolver Parent { get; }
         public object ApplicationOrigin { get; }
+        public DiagnosticsCollector Diagnostics { get; set; }
 
         private readonly Registry registry;
         private readonly ConcurrentDictionary<Registration, Lazy<object>> sharedInstances = new ConcurrentDictionary<Registration, Lazy<object>>();
@@ -86,6 +89,10 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Resolve(Registration registration)
         {
+            if (this.Diagnostics != null)
+            {
+                return this.Diagnostics.TraceResolve(registration, this.ResolveCore);
+            }
             return this.ResolveCore(registration);
         }
 
@@ -114,6 +121,7 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
+            this.Diagnostics?.Clear();
             this.disposables.Dispose();
             this.sharedInstances.Clear();
         }
@@ -172,6 +180,7 @@ namespace SContainer.Runtime
     public sealed class Container : IObjectResolver
     {
         public object ApplicationOrigin { get; }
+        public DiagnosticsCollector Diagnostics { get; set; }
 
         private readonly Registry registry;
         private readonly IScopedObjectResolver rootScope;
@@ -205,6 +214,10 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Resolve(Registration registration)
         {
+            if (this.Diagnostics != null)
+            {
+                return this.Diagnostics.TraceResolve(registration, this.ResolveCore);
+            }
             return this.ResolveCore(registration);
         }
 
@@ -226,6 +239,7 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
+            this.Diagnostics?.Clear();
             this.rootScope.Dispose();
             this.disposables.Dispose();
             this.sharedInstances.Clear();

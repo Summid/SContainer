@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace SContainer.Runtime.Diagnostics
 {
+    /// <summary> 所有作用域的诊断信息 </summary>
     public static class DiagnosticsContext
     {
         private static readonly Dictionary<string, DiagnosticsCollector> collectors = new Dictionary<string, DiagnosticsCollector>();

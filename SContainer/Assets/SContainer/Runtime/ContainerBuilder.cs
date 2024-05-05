@@ -1,4 +1,5 @@
-﻿using SContainer.Runtime.Internal;
+﻿using SContainer.Runtime.Diagnostics;
+using SContainer.Runtime.Internal;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,7 @@ namespace SContainer.Runtime
     public interface IContainerBuilder
     {
         object ApplicationOrigin { get; set; }
+        DiagnosticsCollector Diagnostics { get; set; }
         int Count { get; }
         RegistrationBuilder this[int index] { get; set; }
         
@@ -40,6 +42,7 @@ namespace SContainer.Runtime
         {
             var registry = this.BuildRegistry();
             var container = new ScopedContainer(registry, this.root, this.parent, this.ApplicationOrigin);
+            container.Diagnostics = this.Diagnostics;
             this.EmitCallback(container);
             return container;
         }
@@ -85,13 +88,25 @@ namespace SContainer.Runtime
             set => this.registrationBuilders[index] = value;
         }
 
+        public DiagnosticsCollector Diagnostics
+        {
+            get => this.diagnostics;
+            set
+            {
+                this.diagnostics = value;
+                this.diagnostics?.Clear();
+            }
+        }
+
         private readonly List<RegistrationBuilder> registrationBuilders = new List<RegistrationBuilder>();
         private Action<IObjectResolver> builderCallback;
+        private DiagnosticsCollector diagnostics;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Register<T>(T registrationBuilder) where T : RegistrationBuilder
         {
             this.registrationBuilders.Add(registrationBuilder);
+            this.Diagnostics?.TraceRegister(new RegisterInfo(registrationBuilder));
             return registrationBuilder;
         }
         
@@ -119,6 +134,7 @@ namespace SContainer.Runtime
         {
             var registry = this.BuildRegistry();
             var container = new Container(registry, this.ApplicationOrigin);
+            container.Diagnostics = this.Diagnostics;
             this.EmitCallback(container);
             return container;
         }
@@ -131,6 +147,7 @@ namespace SContainer.Runtime
             {
                 var registrationBuilder = this.registrationBuilders[i];
                 var registration = registrationBuilder.Build();
+                this.Diagnostics?.TraceBuild(registrationBuilder, registration);
                 registrations[i] = registration;
             }
 
@@ -150,6 +167,7 @@ namespace SContainer.Runtime
         protected void EmitCallback(IObjectResolver container)
         {
             this.builderCallback?.Invoke(container);
+            this.Diagnostics?.NotifyContainerBuilt(container);
         }
     }
 }

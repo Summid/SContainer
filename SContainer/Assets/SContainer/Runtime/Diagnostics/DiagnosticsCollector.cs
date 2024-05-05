@@ -7,6 +7,7 @@ using System.Threading;
 
 namespace SContainer.Runtime.Diagnostics
 {
+    /// <summary> 处理自身作用域的诊断信息 </summary>
     public sealed class DiagnosticsCollector
     {
         public string ScopeName { get; }
