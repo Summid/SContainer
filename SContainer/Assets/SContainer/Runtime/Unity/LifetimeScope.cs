@@ -210,7 +210,7 @@ namespace SContainer.Runtime.Unity
             CancelAwake(this);
             if (SContainerSettings.DiagnosticsEnabled)
             {
-                //todo Remove diagnostics collector
+                DiagnosticsContext.RemoveCollector(this.scopeName);
             }
         }
 
