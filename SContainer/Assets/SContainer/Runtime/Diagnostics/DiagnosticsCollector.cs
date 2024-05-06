@@ -14,7 +14,7 @@ namespace SContainer.Runtime.Diagnostics
 
         private readonly List<DiagnosticsInfo> diagnosticsInfos = new List<DiagnosticsInfo>();
         
-        /// <summary> 解析调用栈，栈底的对象被（紧邻的）栈顶的依赖 </summary>
+        /// <summary> 解析调用栈，栈底的对象依赖（紧邻的）栈顶对象 </summary>
         private readonly ThreadLocal<Stack<DiagnosticsInfo>> resolveCallStack
             = new ThreadLocal<Stack<DiagnosticsInfo>>(() => new Stack<DiagnosticsInfo>());
 

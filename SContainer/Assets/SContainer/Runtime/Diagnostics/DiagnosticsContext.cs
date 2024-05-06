@@ -30,7 +30,7 @@ namespace SContainer.Runtime.Diagnostics
             {
                 return collectors
                     .SelectMany(x => x.Value.GetDiagnosticsInfos())
-                    .Where(x => x.ResolveInfo.MaxDepth <= 1)
+                    .Where(x => x.ResolveInfo.MaxDepth <= 1) // 只取最多两层解析链
                     .ToLookup(x => x.ScopeName);
             }
         }
