@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SContainer.Runtime.Diagnostics;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -233,7 +234,7 @@ namespace SContainer.Runtime.Unity
                 {
                     builder.RegisterBuildCallback(this.SetContainer);
                     builder.ApplicationOrigin = this;
-                    // todo set builder's diagnostics
+                    builder.Diagnostics = SContainerSettings.DiagnosticsEnabled ? DiagnosticsContext.GetCollector(this.scopeName) : null;
                     this.InstallTo(builder);
                 });
             }
@@ -242,7 +243,7 @@ namespace SContainer.Runtime.Unity
                 var builder = new ContainerBuilder
                 {
                     ApplicationOrigin = this,
-                    // todo set builder's diagnostics
+                    Diagnostics = SContainerSettings.DiagnosticsEnabled ? DiagnosticsContext.GetCollector(this.scopeName) : null,
                 };
                 builder.RegisterBuildCallback(this.SetContainer);
                 this.InstallTo(builder);
