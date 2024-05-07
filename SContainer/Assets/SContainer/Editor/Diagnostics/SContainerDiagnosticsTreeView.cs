@@ -109,7 +109,7 @@ namespace SContainer.Editor.Diagnostics
         
         private bool flatten;
 
-        public SContainerDiagnosticsTreeView(TreeViewState state)
+        public SContainerDiagnosticsTreeView()
             : this(new TreeViewState(), new MultiColumnHeader(new MultiColumnHeaderState(Columns)))
         {
         }

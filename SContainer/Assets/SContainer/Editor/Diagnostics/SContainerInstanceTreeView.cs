@@ -25,7 +25,7 @@ namespace SContainer.Editor.Diagnostics
         
         public DiagnosticsInfo CurrentDiagnosticsInfo { get; set; }
 
-        public SContainerInstanceTreeView(TreeViewState state) : base(state)
+        public SContainerInstanceTreeView() : base(new TreeViewState())
         {
             this.Reload();
         }
