@@ -20,14 +20,7 @@ namespace SContainer.Runtime.Unity
         {
             PlayerLoopHelper.EnsureInitialized();
 
-            EntryPointExceptionHandler exceptionHandler = null;
-            try
-            {
-                exceptionHandler = this.container.Resolve<EntryPointExceptionHandler>();
-            }
-            catch (SContainerException ex) when (ex.InvalidType == typeof(EntryPointExceptionHandler))
-            {
-            }
+            EntryPointExceptionHandler exceptionHandler = this.container.ResolveOrDefault<EntryPointExceptionHandler>();
 
             var initializables = this.container.Resolve<ContainerLocal<IReadOnlyList<IInitializable>>>().Value;
             for (var i = 0; i < initializables.Count; i++)
