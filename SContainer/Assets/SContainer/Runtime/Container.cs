@@ -31,6 +31,15 @@ namespace SContainer.Runtime
         object Resolve(Type type);
 
         /// <summary>
+        /// Try resolve from type.
+        /// </summary>
+        /// <remarks>
+        /// This version of resolve looks for all of scopes.
+        /// </remarks>
+        /// <returns>Successfully resolved</returns>
+        bool TryResolve(Type type, out object resolved);
+
+        /// <summary>
         /// Resolve from meta with registration.
         /// </summary>
         /// <remarks>
@@ -84,7 +93,27 @@ namespace SContainer.Runtime
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public object Resolve(Type type) => this.Resolve(this.FindRegistration(type));
+        public object Resolve(Type type)
+        {
+            if (this.TryFindRegistration(type, out var registration))
+            {
+                return Resolve(registration);
+            }
+            throw new SContainerException(type, $"No such registration of type: {type}");
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryResolve(Type type, out object resolved)
+        {
+            if (this.TryFindRegistration(type, out var registration))
+            {
+                resolved = this.Resolve(registration);
+                return true;
+            }
+
+            resolved = default;
+            return false;
+        }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Resolve(Registration registration)
@@ -162,18 +191,20 @@ namespace SContainer.Runtime
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Registration FindRegistration(Type type)
+        internal bool TryFindRegistration(Type type, out Registration registration)
         {
             IScopedObjectResolver scope = this;
             while (scope != null)
             {
-                if (scope.TryGetRegistration(type, out var registration))
+                if (scope.TryGetRegistration(type, out registration))
                 {
-                    return registration;
+                    return true;
                 }
                 scope = scope.Parent;
             }
-            throw new SContainerException(type, $"No such registration of type: {type}");
+
+            registration = default;
+            return false;
         }
     }
 
@@ -209,6 +240,19 @@ namespace SContainer.Runtime
                 return this.Resolve(registration);
             }
             throw new SContainerException(type, $"No such registration of type: {type}");
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool TryResolve(Type type, out object resolved)
+        {
+            if (this.TryGetRegistration(type, out var registration))
+            {
+                resolved = this.Resolve(registration);
+                return true;
+            }
+
+            resolved = default;
+            return false;
         }
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
