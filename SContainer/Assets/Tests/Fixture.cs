@@ -1,30 +1,47 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace SContainer.Tests
 {
-    public interface I1
+    internal interface I1
     {
     }
 
-    public interface I2<T>
+    internal interface I2<T>
     {
     }
 
-    public interface I3
+    internal interface I3
     {
     }
 
-    public class ServiceA : I1, I3
+    internal class ServiceA : I1, I3
     {
     }
 
-    public class ServiceB : I1
+    internal class ServiceB : I1
     {
     }
 
-    public class GenericClass<T> : I2<T>
+    internal class ServiceC
     {
+    }
+
+    internal class GenericServiceA<T> : I2<T>
+    {
+    }
+
+    internal class DisposableServiceA : IDisposable
+    {
+        public bool Disposed { get; private set; }
+        public void Dispose() => this.Disposed = true;
+    }
+    
+    internal class DisposableServiceB : IDisposable
+    {
+        public bool Disposed { get; private set; }
+        public void Dispose() => this.Disposed = true;
     }
 }

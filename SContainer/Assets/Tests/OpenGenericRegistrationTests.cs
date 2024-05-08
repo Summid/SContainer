@@ -16,11 +16,11 @@ namespace SContainer.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.Register(typeof(GenericClass<>), Lifetime.Singleton);
+            builder.Register(typeof(GenericServiceA<>), Lifetime.Singleton);
 
             var container = builder.Build();
-            var obj1 = container.Resolve<GenericClass<int>>();
-            Assert.That(obj1, Is.TypeOf<GenericClass<int>>());
+            var obj1 = container.Resolve<GenericServiceA<int>>();
+            Assert.That(obj1, Is.TypeOf<GenericServiceA<int>>());
         }
         
         [Test]
@@ -28,11 +28,11 @@ namespace SContainer.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.Register(typeof(I2<>),typeof(GenericClass<>), Lifetime.Singleton);
+            builder.Register(typeof(I2<>),typeof(GenericServiceA<>), Lifetime.Singleton);
 
             var container = builder.Build();
             var obj1 = container.Resolve(typeof(I2<int>));
-            Assert.That(obj1, Is.TypeOf<GenericClass<int>>());
+            Assert.That(obj1, Is.TypeOf<GenericServiceA<int>>());
         }
 
         [Test]
@@ -40,11 +40,11 @@ namespace SContainer.Tests
         {
             var builder = new ContainerBuilder();
             
-            builder.Register(typeof(GenericClass<>), Lifetime.Singleton);
+            builder.Register(typeof(GenericServiceA<>), Lifetime.Singleton);
 
             var container = builder.Build();
             
-            Assert.Catch(typeof(InvalidOperationException), () => container.Resolve(typeof(GenericClass<>)));
+            Assert.Catch(typeof(InvalidOperationException), () => container.Resolve(typeof(GenericServiceA<>)));
         }
     }
 }
