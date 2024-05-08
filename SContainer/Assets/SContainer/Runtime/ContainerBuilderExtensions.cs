@@ -11,7 +11,9 @@ namespace SContainer.Runtime
             this IContainerBuilder builder,
             Type type,
             Lifetime lifetime) =>
-            builder.Register(new RegistrationBuilder(type, lifetime));
+            builder.Register(type.IsGenericType && type.IsGenericTypeDefinition
+                ? new OpenGenericRegistrationBuilder(type, lifetime)
+                : new RegistrationBuilder(type, lifetime));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static RegistrationBuilder Register(
