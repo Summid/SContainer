@@ -48,7 +48,7 @@ namespace SContainer.Runtime
             return this;
         }
 
-        public RegistrationBuilder AsImplementedInterfaces()
+        public virtual RegistrationBuilder AsImplementedInterfaces()
         {
             this.InterfaceTypes = this.InterfaceTypes ?? new List<Type>();
             this.InterfaceTypes.AddRange(this.ImplementationType.GetInterfaces());
@@ -128,7 +128,7 @@ namespace SContainer.Runtime
             return this.WithParameter(typeof(TParam), _ => value);
         }
         
-        protected void AddInterfaceType(Type interfaceType)
+        protected virtual void AddInterfaceType(Type interfaceType)
         {
             if (!interfaceType.IsAssignableFrom(this.ImplementationType))
             {
