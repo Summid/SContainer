@@ -115,7 +115,8 @@ namespace SContainer.Runtime
             {
                 var openGenericType = RuntimeTypeCache.OpenGenericTypeOf(interfaceType);
                 var typeParameters = RuntimeTypeCache.GenericTypeParametersOf(interfaceType);
-                return this.TryFallbackToSingleElementCollection(interfaceType, openGenericType, typeParameters, out registration) ||
+                return this.TryGetClosedGenericRegistration(interfaceType, openGenericType, typeParameters, out registration) ||
+                    this.TryFallbackToSingleElementCollection(interfaceType, openGenericType, typeParameters, out registration) ||
                     this.TryFallbackContainerLocal(interfaceType, openGenericType, typeParameters, out registration);
             }
             return false;
@@ -132,6 +133,31 @@ namespace SContainer.Runtime
             }
 
             return this.hashTable.TryGet(type, out _);
+        }
+
+        /// <summary>
+        /// 处理类似这种情况：
+        /// builder.Register(typeof(GenericClass`1[]));
+        /// container.Resolve(typeof(GenericClass`1[int]));
+        /// 详情查看测试代码 OpenGenericRegistrationTests
+        /// </summary>
+        private bool TryGetClosedGenericRegistration(
+            Type interfaceType,
+            Type openGenericType,
+            Type[] typeParameters,
+            out Registration registration)
+        {
+            if (this.hashTable.TryGet(openGenericType, out var openGenericRegistration))
+            {
+                if (openGenericRegistration.Provider is OpenGenericInstanceProvider implementationRegistration)
+                {
+                    registration = implementationRegistration.GetClosedRegistration(interfaceType, typeParameters);
+                    return true;
+                }
+            }
+
+            registration = null;
+            return false;
         }
 
         /// <summary>
