@@ -204,7 +204,7 @@ namespace SContainer.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Resolve(Type type)
         {
-            if (this.registry.TryGet(type, out var registration)) // This version of resolve looks for all of scope
+            if (this.TryGetRegistration(type, out var registration)) // This version of resolve looks for all of scope
             {
                 return this.Resolve(registration);
             }
