@@ -34,13 +34,14 @@ namespace SContainer.Runtime.Unity
     public static class ContainerBuilderUnityExtensions
     {
 #region EntryPoint
+
         public static void UseEntryPoints(
             this IContainerBuilder builder,
             Action<EntryPointsBuilder> configuration)
         {
             builder.UseEntryPoints(Lifetime.Singleton, configuration);
         }
-        
+
         public static void UseEntryPoints(
             this IContainerBuilder builder,
             Lifetime lifetime,
@@ -64,9 +65,11 @@ namespace SContainer.Runtime.Unity
         {
             builder.RegisterInstance(new EntryPointExceptionHandler(exceptionHandler));
         }
+
 #endregion
 
 #region UnityComponent
+
         public static void UseComponents(this IContainerBuilder builder, Action<ComponentsBuilder> configuration)
         {
             configuration(new ComponentsBuilder(builder));
@@ -79,7 +82,7 @@ namespace SContainer.Runtime.Unity
         {
             configuration(new ComponentsBuilder(builder, root));
         }
-        
+
         public static RegistrationBuilder RegisterComponent<TInterface>(
             this IContainerBuilder builder,
             TInterface component)
@@ -174,6 +177,7 @@ namespace SContainer.Runtime.Unity
             componentRegistrationBuilder.As<TInterface>();
             return componentRegistrationBuilder;
         }
+
 #endregion
     }
 

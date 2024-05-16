@@ -9,11 +9,15 @@ namespace SContainer.Tests
     {
     }
 
-    internal interface I2<T>
+    internal interface I2
     {
     }
 
     internal interface I3
+    {
+    }
+
+    internal interface GenericI1<T>
     {
     }
 
@@ -29,7 +33,7 @@ namespace SContainer.Tests
     {
     }
 
-    internal class GenericServiceA<T> : I2<T>
+    internal class GenericServiceA<T> : GenericI1<T>
     {
     }
 

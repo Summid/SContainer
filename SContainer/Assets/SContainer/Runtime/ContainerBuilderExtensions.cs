@@ -69,5 +69,32 @@ namespace SContainer.Runtime
             TInterface1 instance)
             => builder.RegisterInstance(instance).As(typeof(TInterface1), typeof(TInterface2), typeof(TInterface3));
 #endregion
+
+#region RegisterFacotry
+        public static RegistrationBuilder RegisterFactory<T>(
+            this IContainerBuilder builder,
+            Func<T> factory)
+            => builder.RegisterInstance(factory);
+
+        public static RegistrationBuilder RegisterFactory<TParam1, T>(
+            this IContainerBuilder builder,
+            Func<TParam1, T> factory)
+            => builder.RegisterInstance(factory);
+
+        public static RegistrationBuilder RegisterFactory<TParam1, TParam2, T>(
+            this IContainerBuilder builder,
+            Func<TParam1, TParam2, T> factory)
+            => builder.RegisterInstance(factory);
+
+        public static RegistrationBuilder RegisterFactory<TParam1, TParam2, TParam3, T>(
+            this IContainerBuilder builder,
+            Func<TParam1, TParam2, TParam3, T> factory)
+            => builder.RegisterInstance(factory);
+
+        public static RegistrationBuilder RegisterFactory<TParam1, TParam2, TParam3, TParam4, T>(
+            this IContainerBuilder builder,
+            Func<TParam1, TParam2, TParam3, TParam4, T> factory)
+            => builder.RegisterInstance(factory);
+#endregion
     }
 }

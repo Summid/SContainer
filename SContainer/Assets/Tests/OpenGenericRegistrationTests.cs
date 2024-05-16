@@ -28,10 +28,10 @@ namespace SContainer.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.Register(typeof(I2<>),typeof(GenericServiceA<>), Lifetime.Singleton);
+            builder.Register(typeof(GenericI1<>),typeof(GenericServiceA<>), Lifetime.Singleton);
 
             var container = builder.Build();
-            var obj1 = container.Resolve(typeof(I2<int>));
+            var obj1 = container.Resolve(typeof(GenericI1<int>));
             Assert.That(obj1, Is.TypeOf<GenericServiceA<int>>());
         }
 
