@@ -36,6 +36,10 @@ namespace SContainer.Tests
     internal class GenericServiceA<T> : GenericI1<T>
     {
     }
+    
+    public class NoDependencyServiceA : I2
+    {
+    }
 
     internal class DisposableServiceA : IDisposable
     {
