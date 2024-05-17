@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 namespace SContainer.Runtime
 {
     /// <summary>
-    /// ContainerBuilder.Configure => registry Type via RegistrationBuilders => ContainerBuilder.Build =>
+    /// ContainerBuilder.Configure => register Type via RegistrationBuilders => ContainerBuilder.Build =>
     /// RegistrationBuilder.Build => wrap all registrations into Registry
     /// </summary>
     public sealed class Registration
