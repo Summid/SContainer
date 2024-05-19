@@ -4,7 +4,7 @@ using UnityEngine;
 namespace SContainer.Runtime.Unity
 {
     [Serializable]
-    public class ParentReference : ISerializationCallbackReceiver
+    public struct ParentReference : ISerializationCallbackReceiver
     {
         [SerializeField]
         public string TypeName;
