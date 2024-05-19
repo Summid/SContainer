@@ -41,7 +41,7 @@ namespace SContainer.Tests
     {
     }
 
-    internal class DisposableServiceA : IDisposable
+    internal class DisposableServiceA : I1, IDisposable
     {
         public bool Disposed { get; private set; }
         public void Dispose() => this.Disposed = true;
