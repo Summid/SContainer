@@ -23,8 +23,10 @@ namespace SContainer.Runtime
             
             foreach (var registration in registrations)
             {
-                if (registration.InterfaceTypes is IReadOnlyList<Type> interfaceTypes) // if registration.InterfaceTypes is not null
+                if (registration.InterfaceTypes is IReadOnlyList<Type> interfaceTypes)
                 {
+                    // if registration.InterfaceTypes is not null, only register interfaceTypes
+                    // 注册成接口后，默认只能解析接口，不能直接解析实现接口的类；如果想解析实现类，可使用 AsSelf() API
                     for (var i = 0; i < interfaceTypes.Count; i++)
                     {
                         AddToBuildBuffer(buildBuffer, interfaceTypes[i], registration);
