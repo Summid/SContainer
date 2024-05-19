@@ -97,7 +97,7 @@ namespace SContainer.Runtime
         {
             if (this.TryFindRegistration(type, out var registration))
             {
-                return Resolve(registration);
+                return this.Resolve(registration);
             }
             throw new SContainerException(type, $"No such registration of type: {type}");
         }
